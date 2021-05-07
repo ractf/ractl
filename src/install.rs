@@ -2,6 +2,8 @@ use clap::{SubCommand, App};
 use dialoguer::MultiSelect;
 use dialoguer::theme::ColorfulTheme;
 use std::fmt::Debug;
+use console::style;
+use std::{env, fs};
 
 #[derive(Debug)]
 struct Options {
@@ -55,11 +57,8 @@ pub fn subcommand<'a, 'b>() -> App<'a, 'b> {
 }
 
 pub fn run() {
-    if cfg!(windows) {
-        println!("This script doesn't currently support windows.");
-        println!("Maybe with your help, it could! Contributions to this script are welcome at https://github.com/ractf/ractl");
-        return;
-    }
+    validate_environment();
+    println!("{} {} {}", style("Welcome to the").cyan(), style("RACTF").bold(), style("installer").cyan());
 
     let mut options = Options::blank();
 
@@ -83,4 +82,30 @@ pub fn run() {
     for i in selected_services {
         options.components[i] = true;
     }
+}
+
+fn validate_environment() {
+    if cfg!(windows) {
+        println!("{}", style("This script doesn't currently support windows.").red());
+        println!("{}", style("Maybe with your help, it could! Contributions to this script are welcome at https://github.com/ractf/ractl").red());
+        std::process::exit(1);
+    }
+
+    require_command("docker");
+    require_command("docker-compose");
+}
+
+fn require_command(command: &str) {
+    if let Ok(path) = env::var("PATH") {
+        for folder in path.split(":") {
+            let file = format!("{}/{}", folder, command);
+            if fs::metadata(file).is_ok() {
+                return;
+            }
+        }
+    }
+
+    println!("{}", style(command.to_owned() + ", a dependency of this script, doesn't appear to be installed.").red());
+    println!("{}", style("If it is, ensure its executable is in the current user's PATH.").red());
+    std::process::exit(1);
 }
