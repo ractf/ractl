@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: centos:8
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
@@ -61,12 +63,28 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Setup RPM tools
+        if: steps.semver_change.outputs.changed == 'true'
+        run: "dnf install rpmdevtools -y && echo '%_topdir %(echo $PWD)/rpmbuild' > $HOME/.rpmmacros && rpmdev-setuptree"
+        working-directory: build
+
+      - name: Update the Semver in the RPM Spec
+        if: steps.semver_change.outputs.changed == 'true'
+        run: 'sed -i -e "s/Version:.*/Version:        $VERSION/g" build/SPECS/ractl.spec'
+        env:
+          VERSION: ${{ steps.semver.outputs.semver }}
+
       - name: Build ractl
         uses: actions-rs/cargo@v1
         if: steps.semver_change.outputs.changed == 'true'
         with:
           command: build
           args: --release --all-features
+
+      - name: Compile RPM
+        if: steps.semver_change.outputs.changed == 'true'
+        run: ./build.sh
+        working-directory: build
 
       #- name: Create Sentry release
       #  if: steps.semver_change.outputs.changed == 'true'
@@ -101,4 +119,16 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./target/release/ractl
           asset_name: ractl
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Asset - RPM
+        if: steps.semver_change.outputs.changed == 'true'
+        id: upload-release-asset-binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/rpmbuild/RPMS/x86_64/ractl-${{ steps.semver.outputs.semver }}-1.x86_64.rpm
+          asset_name: ractl-${{ steps.semver.outputs.semver }}-1.x86_64.rpm
           asset_content_type: application/octet-stream
