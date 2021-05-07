@@ -1,0 +1,22 @@
+on: [push]
+
+name: CI
+
+jobs:
+  compile:
+    name: Compile project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build ractl
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
