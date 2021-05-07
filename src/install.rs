@@ -55,6 +55,12 @@ pub fn subcommand<'a, 'b>() -> App<'a, 'b> {
 }
 
 pub fn run() {
+    if cfg!(windows) {
+        println!("This script doesn't currently support windows.");
+        println!("Maybe with your help, it could! Contributions to this script are welcome at https://github.com/ractf/ractl");
+        return;
+    }
+
     let mut options = Options::blank();
 
     let possible_services = &[
