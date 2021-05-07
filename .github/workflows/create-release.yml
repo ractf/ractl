@@ -65,7 +65,7 @@ jobs:
 
       - name: Setup RPM tools
         if: steps.semver_change.outputs.changed == 'true'
-        run: "dnf install rpmdevtools -y && echo '%_topdir %(echo $PWD)/rpmbuild' > $HOME/.rpmmacros && rpmdev-setuptree"
+        run: "dnf install rpmdevtools gcc -y && echo '%_topdir %(echo $PWD)/rpmbuild' > $HOME/.rpmmacros && rpmdev-setuptree"
         working-directory: build
 
       - name: Update the Semver in the RPM Spec
