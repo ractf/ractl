@@ -8,3 +8,4 @@ edition = "2018"
 [dependencies]
 clap = "~2.27.0"
 dialoguer = "0.8.0"
+console = "0.14.1"
