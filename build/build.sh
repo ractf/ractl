@@ -4,8 +4,6 @@
 #
 #set -e
 
-VERSION="0.0.1"
-
 mkdir -p /tmp/ractl/ractl-$VERSION/usr/bin SOURCES
 cp ../target/release/ractl /tmp/ractl/ractl-$VERSION/usr/bin
 tar czf ./SOURCES/ractl-$VERSION.tar.gz -C /tmp/ractl ractl-$VERSION
