@@ -11,6 +11,9 @@ jobs:
     container:
       image: fedora:34
     steps:
+      - name: Install Git
+        run: dnf install git -y
+
       - name: Checkout the repository
         uses: actions/checkout@v2
         with:
