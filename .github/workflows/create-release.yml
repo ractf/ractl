@@ -88,6 +88,8 @@ jobs:
         if: steps.semver_change.outputs.changed == 'true'
         run: ./build.sh
         working-directory: build
+        env:
+          VERSION: ${{ steps.semver.outputs.semver }}
 
       #- name: Create Sentry release
       #  if: steps.semver_change.outputs.changed == 'true'
